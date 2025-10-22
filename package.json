@@ -1,0 +1,10 @@
+{
+  "name": "remastershadhi-ai-lyric-generator",
+  "version": "1.0.0",
+  "description": "AI-powered web application that generates multi-language song lyrics.",
+  "private": true,
+  "dependencies": {
+    "@google/genai": "^1.25.0",
+    "@netlify/functions": "^2.7.0"
+  }
+}

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,22 +7,16 @@
     <title>RemasterShadhi: AI Multi-Language Lyric Generator</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Lucide Icons for better UX -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Custom Tailwind Configuration - Using corrected hex codes */
         :root {
-            --primary-orange: #FF8A00; /* Corrected from #FF8AO0 */
-            --primary-dark-bg: #0F0F0F; /* Corrected from #OFOFOF */
+            --primary-orange: #FF8A00;
+            --primary-dark-bg: #0F0F0F;
             --card-bg: #1A1A1A;
-            --text-light: #E0E0E0; /* Corrected from #EOEOEO */
+            --text-light: #E0E0E0;
             --input-bg: #2C2C2C;
             --input-border: #4A4A4A;
         }
-
-        /* Override default colors using the custom palette */
-        /* Tailwind configuration block is needed to use custom names like rs-orange directly */
-        /* We must use inline <script> for this to work in a single file HTML setup */
     </style>
     <script>
         tailwind.config = {
@@ -42,8 +37,11 @@
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Custom Scrollbar Styling (Required) */
+        /* Custom Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -58,7 +56,7 @@
             background: #e57e00;
         }
 
-        /* Custom Select Styling (Required) */
+        /* Custom Select Styling */
         .custom-select {
             appearance: none; /* Hide native arrow */
             -webkit-appearance: none;
@@ -71,401 +69,21 @@
             padding-right: 2.5rem !important; /* Make space for the icon */
         }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.25.0",
+    "@netlify/functions": "https://aistudiocdn.com/@netlify/functions@^5.0.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-rs-dark-bg text-rs-text min-h-screen font-sans">
-    <div id="app" class="max-w-lg mx-auto p-4 md:p-6">
-
-        <!-- Header -->
-        <header class="text-center mb-8 pt-4">
-            <div class="flex items-center justify-center space-x-3 mb-4">
-                <!-- Logo Placeholder -->
-                <img src="https://placehold.co/112x112/FF8A00/0F0F0F?text=RS" alt="RemasterShadhi Logo" class="rounded-full w-16 h-16 shadow-lg">
-                <h1 class="text-4xl font-extrabold tracking-tight">
-                    <span class="text-white">REMASTER</span>
-                    <span class="text-rs-orange italic">Shadhi</span>
-                </h1>
-            </div>
-            <p class="text-sm text-gray-400">AI Multi-Language Lyric Generator</p>
-        </header>
-
-        <!-- Main Form Card -->
-        <main class="bg-rs-card-bg p-6 rounded-xl shadow-2xl border border-gray-800">
-            <form id="lyricForm">
-                <div class="mb-6">
-                    <label for="theme" class="block text-sm font-semibold mb-2 text-rs-text">Theme / Story / Emotion (Required)</label>
-                    <textarea id="theme" name="theme" rows="4" required
-                        class="w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange placeholder-gray-500 text-rs-text transition-colors"
-                        placeholder="E.g., A vibrant celebration of a traditional Indian festival with modern beats.">A vibrant celebration of a traditional Indian festival with modern beats</textarea>
-                </div>
-
-                <!-- Target Language -->
-                <div class="mb-6">
-                    <label for="language" class="block text-sm font-semibold mb-2 text-rs-text">Target Language</label>
-                    <div class="relative">
-                        <select id="language" name="language" required class="custom-select w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange text-rs-text transition-colors">
-                            <option value="English">English</option>
-                            <option value="Hindi">Hindi</option>
-                            <option value="Tamil (தமிழ்)">Tamil (தமிழ்)</option>
-                            <option value="Malayalam (മലയാളം)">Malayalam (മലയാളം)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Advanced Options Collapsible Section -->
-                <div class="mb-8 border-t border-gray-700 pt-4">
-                    <button type="button" id="toggleAdvanced" class="flex justify-between items-center w-full text-left py-2 font-bold text-rs-orange hover:text-white transition-colors">
-                        <span class="flex items-center">
-                            <i data-lucide="settings-2" class="w-5 h-5 mr-2"></i>
-                            Advanced Options (Optional)
-                        </span>
-                        <i data-lucide="chevron-down" id="advancedIcon" class="w-5 h-5 transition-transform duration-300"></i>
-                    </button>
-
-                    <div id="advancedContent" class="space-y-4 mt-3 hidden">
-                        <!-- Genre -->
-                        <div>
-                            <label for="genre" class="block text-sm font-semibold mb-2 text-rs-text">Genre</label>
-                            <div class="relative">
-                                <select id="genre" name="genre" class="custom-select w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange text-rs-text">
-                                    <option value="">(Any / Default)</option>
-                                    <option value="Pop">Pop</option>
-                                    <option value="Rock">Rock</option>
-                                    <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
-                                    <option value="R&B">R&B</option>
-                                    <option value="Acoustic Ballad">Acoustic Ballad</option>
-                                    <option value="EDM/Dance">EDM/Dance</option>
-                                    <option value="Ghazal/Qawwali">Ghazal/Qawwali (Indian Classical/Devotional)</option>
-                                    <option value="Kuthu/Gaana">Kuthu/Gaana (South Indian Folk Dance)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Mood/Tone -->
-                        <div>
-                            <label for="mood" class="block text-sm font-semibold mb-2 text-rs-text">Mood / Tone</label>
-                            <div class="relative">
-                                <select id="mood" name="mood" class="custom-select w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange text-rs-text">
-                                    <option value="">(Any / Default)</option>
-                                    <option value="Melancholic/Sad">Melancholic/Sad</option>
-                                    <option value="Upbeat/Energetic">Upbeat/Energetic</option>
-                                    <option value="Romantic/Lyrical">Romantic/Lyrical</option>
-                                    <option value="Angry/Aggressive">Angry/Aggressive</option>
-                                    <option value="Wistful/Nostalgic">Wistful/Nostalgic</option>
-                                    <option value="Triumphant/Motivational">Triumphant/Motivational</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Target Audience -->
-                        <div>
-                            <label for="audience" class="block text-sm font-semibold mb-2 text-rs-text">Target Audience</label>
-                            <div class="relative">
-                                <select id="audience" name="audience" class="custom-select w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange text-rs-text">
-                                    <option value="">(Any / Default)</option>
-                                    <option value="Teens/Young Adult">Teens/Young Adult</option>
-                                    <option value="General Audience">General Audience</option>
-                                    <option value="Niche/Specific Theme">Niche/Specific Theme</option>
-                                    <option value="Academic/Mature">Academic/Mature</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Rhyme Scheme/Style -->
-                        <div>
-                            <label for="rhyme" class="block text-sm font-semibold mb-2 text-rs-text">Overall Rhyme Scheme / Style</label>
-                            <div class="relative">
-                                <select id="rhyme" name="rhyme" class="custom-select w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange text-rs-text">
-                                    <option value="">(Any / Default)</option>
-                                    <option value="AABB (Couplets)">AABB (Couplets - Simple)</option>
-                                    <option value="ABAB (Alternating)">ABAB (Alternating)</option>
-                                    <option value="Free Verse (No strict rhyme)">Free Verse (No strict rhyme)</option>
-                                    <option value="Slant Rhyme/Subtle">Slant Rhyme/Subtle</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Artist Style -->
-                        <div>
-                            <label for="artistStyle" class="block text-sm font-semibold mb-2 text-rs-text">Artist Style (e.g., A.R. Rahman, Drake, Taylor Swift)</label>
-                            <input type="text" id="artistStyle" name="artistStyle"
-                                class="w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange placeholder-gray-500 text-rs-text transition-colors"
-                                placeholder="E.g., Inspired by the poetic flow of Gulzar...">
-                        </div>
-
-                        <!-- Additional Notes -->
-                        <div>
-                            <label for="additionalNotes" class="block text-sm font-semibold mb-2 text-rs-text">Additional Notes / Instructions</label>
-                            <textarea id="additionalNotes" name="additionalNotes" rows="2"
-                                class="w-full p-3 rounded-lg bg-rs-input-bg border border-rs-input-border focus:border-rs-orange focus:ring-1 focus:ring-rs-orange placeholder-gray-500 text-rs-text transition-colors"
-                                placeholder="E.g., Keep the chorus catchy, 8 lines max."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Generate Button -->
-                <button type="submit" id="generateButton"
-                    class="w-full py-3 rounded-xl bg-rs-orange text-rs-dark-bg font-extrabold text-lg shadow-lg shadow-rs-orange/50 hover:bg-white hover:text-rs-dark-bg transition-all duration-300 flex items-center justify-center space-x-2">
-                    <i data-lucide="music-4" class="w-5 h-5"></i>
-                    <span>Generate Lyrics</span>
-                </button>
-
-                <!-- Loading Indicator -->
-                <div id="loadingIndicator" class="hidden mt-4 text-center">
-                    <svg class="animate-spin h-6 w-6 text-rs-orange mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-sm text-gray-400 mt-2">Harmonizing the verses...</p>
-                </div>
-            </form>
-        </main>
-
-        <!-- Output Area -->
-        <section id="lyricsOutputSection" class="mt-8 pt-6 border-t border-gray-700 hidden">
-            <h2 class="text-2xl font-bold text-white mb-4">Generated Lyrics</h2>
-            <div id="lyricsOutput" class="whitespace-pre-wrap p-5 rounded-xl bg-rs-card-bg border border-gray-800 shadow-xl text-rs-text leading-relaxed text-sm">
-                <!-- Lyrics will be inserted here -->
-            </div>
-            <!-- Copy Button -->
-            <button id="copyButton" class="mt-4 py-2 px-4 rounded-lg bg-rs-input-bg text-rs-orange font-semibold hover:bg-rs-input-border transition-colors flex items-center space-x-2">
-                <i data-lucide="copy" class="w-4 h-4"></i>
-                <span>Copy Lyrics</span>
-            </button>
-        </section>
-
-        <!-- Custom Message Box (Non-native Alert) -->
-        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
-            <div class="bg-rs-card-bg p-6 rounded-xl max-w-sm w-full shadow-2xl border border-rs-orange">
-                <h3 id="messageTitle" class="text-xl font-bold text-rs-orange mb-3">Error</h3>
-                <p id="messageContent" class="text-rs-text mb-4">An unknown error occurred.</p>
-                <button id="closeMessage" class="w-full py-2 rounded-lg bg-rs-orange text-rs-dark-bg font-semibold hover:bg-white transition-colors">
-                    Close
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <script type="module">
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // --- Global Variables and Constants ---
-        const API_KEY = ""; // Intentionally left empty for Canvas runtime injection
-        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
-        const MAX_RETRIES = 3;
-
-        // --- DOM Elements ---
-        const form = document.getElementById('lyricForm');
-        const themeInput = document.getElementById('theme');
-        const languageInput = document.getElementById('language');
-        const genreInput = document.getElementById('genre');
-        const moodInput = document.getElementById('mood');
-        const audienceInput = document.getElementById('audience');
-        const rhymeInput = document.getElementById('rhyme');
-        const artistStyleInput = document.getElementById('artistStyle');
-        const additionalNotesInput = document.getElementById('additionalNotes');
-        const generateButton = document.getElementById('generateButton');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const lyricsOutputSection = document.getElementById('lyricsOutputSection');
-        const lyricsOutput = document.getElementById('lyricsOutput');
-        const copyButton = document.getElementById('copyButton');
-
-        // Advanced options toggle
-        const toggleAdvanced = document.getElementById('toggleAdvanced');
-        const advancedContent = document.getElementById('advancedContent');
-        const advancedIcon = document.getElementById('advancedIcon');
-
-        // Message Box elements
-        const messageBox = document.getElementById('messageBox');
-        const messageTitle = document.getElementById('messageTitle');
-        const messageContent = document.getElementById('messageContent');
-        const closeMessageButton = document.getElementById('closeMessage');
-
-        // --- Helper Functions ---
-
-        /**
-         * Custom non-native alert function.
-         * @param {string} title - Title of the message box.
-         * @param {string} content - Content of the message box.
-         */
-        const showMessage = (title, content) => {
-            messageTitle.textContent = title;
-            messageContent.textContent = content;
-            messageBox.classList.remove('hidden');
-        };
-
-        /**
-         * Exponential backoff retry logic for the API call.
-         * @param {object} payload - The request payload for the API.
-         * @param {number} retryCount - Current retry attempt.
-         * @returns {Promise<object>} The JSON response object.
-         */
-        const fetchWithRetry = async (payload, retryCount = 0) => {
-            const delay = Math.pow(2, retryCount) * 1000 + (Math.random() * 1000); // 1s, 2s, 4s + jitter
-            
-            try {
-                // Initial request without waiting
-                if (retryCount > 0) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-
-                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorDetails = await response.text();
-                    console.error("API Error Response:", errorDetails);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                return response.json();
-
-            } catch (error) {
-                console.error(`Attempt ${retryCount + 1} failed:`, error.message);
-                if (retryCount < MAX_RETRIES) {
-                    // console.log(`Retrying in ${delay / 1000}s...`); // Don't log retries as per instructions
-                    return fetchWithRetry(payload, retryCount + 1);
-                }
-                throw new Error("Failed to generate lyrics after multiple retries. Please check your inputs or try again later.");
-            }
-        };
-
-
-        // --- Main Logic ---
-
-        /**
-         * Constructs the detailed prompt for the Gemini API.
-         * @returns {string} The complete, generated prompt.
-         */
-        const buildPrompt = () => {
-            const theme = themeInput.value.trim();
-            const language = languageInput.value;
-
-            // Optional parameters
-            const genre = genreInput.value.trim();
-            const mood = moodInput.value.trim();
-            const audience = audienceInput.value.trim();
-            const rhyme = rhymeInput.value.trim();
-            const artistStyle = artistStyleInput.value.trim();
-            const additionalNotes = additionalNotesInput.value.trim();
-
-            let prompt = `You are a professional lyricist. Write a complete song based on the following instructions.
-
-Target Language: ${language}
-Main Theme/Story/Emotion: "${theme}"
-
-The output MUST contain the following sections, clearly labeled with their names: INTRO, VERSE 1, CHORUS, VERSE 2, BRIDGE, and OUTRO.
-
-Crucial Instruction: Use different, suitable rhyme schemes or lyrical styles for each of the required sections (INTRO, VERSE 1, CHORUS, VERSE 2, BRIDGE, OUTRO) to enhance musicality, while respecting the overall preferred rhyme scheme if specified.
-
-The final output must be a single block of text with no introductory or concluding commentary, just the formatted lyrics.
-
---- Optional Details ---
-`;
-
-            if (genre) prompt += `Genre Preference: ${genre}\n`;
-            if (mood) prompt += `Mood/Tone: ${mood}\n`;
-            if (audience) prompt += `Target Audience: ${audience}\n`;
-            if (rhyme) prompt += `Overall Rhyme Scheme Preference (Use different schemes per section while aligning to this overall feel): ${rhyme}\n`;
-            if (artistStyle) prompt += `Artist Style/Inspiration: ${artistStyle}\n`;
-            if (additionalNotes) prompt += `Specific Instructions/Notes: ${additionalNotes}\n`;
-
-            return prompt;
-        };
-
-        /**
-         * Generates the lyrics by calling the Gemini API.
-         */
-        const generateLyrics = async () => {
-            const prompt = buildPrompt();
-
-            const payload = {
-                contents: [{ parts: [{ text: prompt }] }],
-                systemInstruction: {
-                    parts: [{ text: "You are a creative, professional, and versatile lyricist capable of writing in multiple languages and adapting complex lyrical structures." }]
-                }
-            };
-
-            // Reset UI for new generation
-            lyricsOutput.textContent = '';
-            lyricsOutputSection.classList.add('hidden');
-            loadingIndicator.classList.remove('hidden');
-            generateButton.disabled = true;
-
-            try {
-                const result = await fetchWithRetry(payload);
-                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (generatedText) {
-                    lyricsOutput.textContent = generatedText;
-                    lyricsOutputSection.classList.remove('hidden');
-
-                    // UX Enhancement: Auto-scroll to output
-                    lyricsOutputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                } else {
-                    showMessage("Generation Failed", "The model did not return any lyrics. Please try again with a different theme.");
-                }
-
-            } catch (error) {
-                showMessage("API Error", error.message);
-            } finally {
-                loadingIndicator.classList.add('hidden');
-                generateButton.disabled = false;
-            }
-        };
-
-        // --- Event Listeners ---
-
-        // Form submission
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            generateLyrics();
-        });
-
-        // Advanced Options toggle
-        toggleAdvanced.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isHidden = advancedContent.classList.toggle('hidden');
-            if (isHidden) {
-                advancedIcon.style.transform = 'rotate(0deg)';
-            } else {
-                advancedIcon.style.transform = 'rotate(180deg)';
-            }
-        });
-
-        // Close custom message box
-        closeMessageButton.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
-        });
-
-        // Copy functionality
-        copyButton.addEventListener('click', () => {
-            const textToCopy = lyricsOutput.textContent;
-            try {
-                // Using clipboard API (might fail in some embedded environments, but is standard)
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    showMessage("Copied!", "Lyrics successfully copied to your clipboard.");
-                }).catch(() => {
-                    // Fallback using document.execCommand('copy') (less modern, but sometimes needed)
-                    const tempElement = document.createElement('textarea');
-                    tempElement.value = textToCopy;
-                    document.body.appendChild(tempElement);
-                    tempElement.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(tempElement);
-                    showMessage("Copied!", "Lyrics successfully copied to your clipboard (using fallback).");
-                });
-            } catch (err) {
-                showMessage("Copy Error", "Could not copy text automatically. Please select the text manually.");
-            }
-        });
-
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
-
